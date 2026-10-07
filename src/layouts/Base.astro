@@ -1,0 +1,37 @@
+---
+import '../styles/site.css';
+const { title, description, active } = Astro.props;
+const nav = [
+  { label: 'Home', href: '/' },
+  { label: 'Research', href: '/research/' },
+  { label: 'About', href: '/about/' },
+  { label: 'Contact', href: '/contact/' },
+];
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f7f5ef" />
+    <meta name="description" content={description} />
+    <title>{title} · Kanxuan He</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="site-wrap">
+      <header class="site-header">
+        <a class="wordmark" href="/" aria-label="Kanxuan He, home">Kanxuan He</a>
+        <nav class="site-nav" aria-label="Main navigation">
+          {nav.map((item) => <a href={item.href} aria-current={active === item.label ? 'page' : undefined}>{item.label}</a>)}
+        </nav>
+      </header>
+      <main id="main"><slot /></main>
+      <footer class="site-footer">
+        <span>Kanxuan He</span>
+        <span>Climate · buildings · people</span>
+        <a href="mailto:kanxuan.he@connect.hku.hk">Get in touch <span aria-hidden="true">↗</span></a>
+      </footer>
+    </div>
+  </body>
+</html>

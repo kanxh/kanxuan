@@ -12,3 +12,6 @@ AGENTS.md
 CLAUDE.md
 
 *.png
+node_modules/
+dist/
+.astro/

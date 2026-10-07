@@ -1,0 +1,367 @@
+---
+import { nodes, edges, relatedTo } from '../data/research.js';
+const map = new Map(nodes.map((node) => [node.id, node]));
+const categories = [
+  { id: 'topic', label: 'Topics' },
+  { id: 'method', label: 'Methods' },
+  { id: 'publication', label: 'Publications' },
+  { id: 'project', label: 'Projects' },
+];
+---
+<section class="network-section" aria-labelledby="map-title">
+  <h2 id="map-title" class="sr-only">Research network</h2>
+  <div class="network-stage" data-network>
+    <svg class="network-svg" viewBox="0 0 1200 650" role="group" aria-label="Interactive research network. Select a node to explore its connections.">
+      <rect class="network-background" width="1200" height="650" />
+      <g class="network-edges" aria-hidden="true">
+        {edges.map((edge) => <line data-source={edge.source} data-target={edge.target} x1={map.get(edge.source).x * 12} y1={map.get(edge.source).y * 6.5} x2={map.get(edge.target).x * 12} y2={map.get(edge.target).y * 6.5} />)}
+      </g>
+      <g class="network-nodes">
+        {nodes.map((node) => <g class:list={['network-node', node.category, { prominent: node.prominent, hub: node.hub }]} data-node={node.id} data-category={node.category} role="button" tabindex="0" aria-label={`${node.label}, ${node.category}`} aria-pressed="false" transform={`translate(${node.x * 12} ${node.y * 6.5})`}>
+          <circle class="node-hit" r="21" />
+          <circle class="node-halo" r={node.hub ? '15' : node.category === 'publication' ? '9' : '11'} />
+          <circle class="node-dot" r={node.hub ? '8.5' : node.category === 'publication' ? '3.8' : node.category === 'method' ? '4.5' : '5'} />
+          <text class="node-label" x={node.x > 77 ? '-12' : '12'} y="4" text-anchor={node.x > 77 ? 'end' : 'start'}>{node.label}</text>
+        </g>)}
+      </g>
+    </svg>
+    <button class="map-reset" type="button" data-reset-view>Reset</button>
+    <aside class="network-detail" data-detail hidden aria-live="polite" aria-label="Selected network node">
+      <div class="detail-heading"><span data-detail-category></span><button type="button" data-detail-close aria-label="Close details">×</button></div>
+      <h3 data-detail-title></h3>
+      <p data-detail-summary></p>
+      <p class="detail-venue" data-detail-venue hidden></p>
+      <div class="detail-actions"><a data-paper-link hidden target="_blank" rel="noopener noreferrer">Open paper ↗</a><a data-research-link hidden>Find in Research ↗</a></div>
+      <h4>Connected to</h4>
+      <ul data-detail-relations></ul>
+    </aside>
+  </div>
+  <div class="network-key" aria-label="Node categories">
+    {categories.map((category) => <span><i class:list={['key-dot', category.id]}></i>{category.label}</span>)}
+  </div>
+  <details class="network-index">
+    <summary>Browse all topics, methods and publications <span aria-hidden="true">＋</span></summary>
+  <div class="network-list" aria-label="Browse the research network as a list">
+    <div class="network-list-heading"><h3>Browse the network</h3></div>
+    {categories.map((category) => <div class="network-list-group">
+      <h4>{category.label}</h4>
+      <div class="network-list-grid">
+        {nodes.filter((node) => node.category === category.id).map((node) => <details>
+          <summary><span class:list={['list-dot', node.category]}></span><span>{node.label}</span><span class="list-count">{relatedTo(node.id).length}</span></summary>
+          <p>{node.summary}</p>
+          <ul>{relatedTo(node.id).map(({ node: neighbor, reason }) => <li><strong>{neighbor.label}</strong><span>{reason}</span>{neighbor.category === 'publication' && <a href={`/research/#${neighbor.id}`}>Find publication ↗</a>}</li>)}</ul>
+          {node.category === 'publication' && <a class="list-publication-link" href={`/research/#${node.id}`}>Find publication ↗</a>}
+        </details>)}
+      </div>
+    </div>)}
+  </div>
+  </details>
+  <script>
+    import { nodes, edges, publications, projects } from '../data/research.js';
+    const root = document.querySelector('[data-network]');
+    if (root) {
+      const svg = root.querySelector('svg');
+      const nodeElements = [...root.querySelectorAll('[data-node]')];
+      const edgeElements = [...root.querySelectorAll('line[data-source]')];
+      const byId = new Map(nodes.map((node) => [node.id, node]));
+      const elementById = new Map(nodeElements.map((element) => [element.dataset.node, element]));
+      const detail = root.querySelector('[data-detail]');
+      const relationList = root.querySelector('[data-detail-relations]');
+      let selected = null;
+      let hovered = null;
+      let view = { x: 0, y: 0, width: 1200, height: 650 };
+      let dragging = null;
+      let nodeDrag = null;
+      let suppressClick = null;
+      const positions = new Map(nodes.map((node) => [node.id, { x: node.x * 12, y: node.y * 6.5, vx: 0, vy: 0 }]));
+      const links = edges.map((edge) => {
+        const a = positions.get(edge.source);
+        const b = positions.get(edge.target);
+        return { a, b, distance: Math.hypot(b.x - a.x, b.y - a.y) };
+      });
+      const mobileView = window.matchMedia('(max-width: 700px)');
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      let temperature = 0;
+      let simulationFrame = null;
+
+      function syncMobileAccess() {
+        svg.setAttribute('aria-hidden', String(mobileView.matches));
+        nodeElements.forEach((element) => element.setAttribute('tabindex', mobileView.matches ? '-1' : '0'));
+      }
+      syncMobileAccess();
+      mobileView.addEventListener('change', syncMobileAccess);
+
+      function linkedEdges(id) {
+        return edges.filter((edge) => edge.source === id || edge.target === id);
+      }
+
+      function renderPositions() {
+        positions.forEach((position, id) => {
+          elementById.get(id).setAttribute('transform', `translate(${position.x} ${position.y})`);
+        });
+        edgeElements.forEach((line) => {
+          const a = positions.get(line.dataset.source);
+          const b = positions.get(line.dataset.target);
+          line.setAttribute('x1', a.x);
+          line.setAttribute('y1', a.y);
+          line.setAttribute('x2', b.x);
+          line.setAttribute('y2', b.y);
+        });
+      }
+
+      function simulate() {
+        simulationFrame = null;
+        const activeId = nodeDrag?.moved ? nodeDrag.id : null;
+        const points = [...positions.values()];
+
+        // A short-range charge keeps dense areas open without changing the authored layout.
+        for (let i = 0; i < points.length; i += 1) {
+          for (let j = i + 1; j < points.length; j += 1) {
+            const a = points[i];
+            const b = points[j];
+            const dx = b.x - a.x;
+            const dy = b.y - a.y;
+            const distance = Math.max(1, Math.hypot(dx, dy));
+            if (distance >= 100) continue;
+            const push = (100 - distance) * .012 * temperature;
+            const fx = dx / distance * push;
+            const fy = dy / distance * push;
+            if (nodes[i].id !== activeId) { a.vx -= fx; a.vy -= fy; }
+            if (nodes[j].id !== activeId) { b.vx += fx; b.vy += fy; }
+          }
+        }
+
+        // Each edge acts as a spring; its rest length comes from the curated layout.
+        links.forEach(({ a, b, distance: restDistance }) => {
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          const distance = Math.max(1, Math.hypot(dx, dy));
+          const pull = (distance - restDistance) * .018 * temperature;
+          const fx = dx / distance * pull;
+          const fy = dy / distance * pull;
+          if (a !== positions.get(activeId)) { a.vx += fx; a.vy += fy; }
+          if (b !== positions.get(activeId)) { b.vx -= fx; b.vy -= fy; }
+        });
+
+        let speed = 0;
+        nodes.forEach((node) => {
+          if (node.id === activeId) return;
+          const point = positions.get(node.id);
+          point.vx = (point.vx + (node.x * 12 - point.x) * .006 * temperature) * .83;
+          point.vy = (point.vy + (node.y * 6.5 - point.y) * .006 * temperature) * .83;
+          point.x = Math.max(20, Math.min(1180, point.x + point.vx));
+          point.y = Math.max(20, Math.min(630, point.y + point.vy));
+          speed = Math.max(speed, Math.abs(point.vx), Math.abs(point.vy));
+        });
+        renderPositions();
+        temperature = activeId ? Math.max(.35, temperature * .975) : temperature * .975;
+        if (activeId || temperature > .015 || speed > .08) simulationFrame = requestAnimationFrame(simulate);
+      }
+
+      function reheat(amount) {
+        if (reducedMotion.matches || mobileView.matches) return;
+        temperature = Math.max(temperature, amount);
+        if (simulationFrame === null) simulationFrame = requestAnimationFrame(simulate);
+      }
+
+      function pointerPoint(event) {
+        return new DOMPoint(event.clientX, event.clientY).matrixTransform(svg.getScreenCTM().inverse());
+      }
+
+      function paint() {
+        const focus = hovered || selected;
+        const related = new Set(focus ? linkedEdges(focus).flatMap((edge) => [edge.source, edge.target]) : []);
+        nodeElements.forEach((element) => {
+          const id = element.dataset.node;
+          element.classList.toggle('is-dimmed', Boolean(focus) && !related.has(id));
+          element.classList.toggle('is-related', Boolean(focus) && related.has(id) && id !== focus);
+          element.classList.toggle('is-focused', id === focus);
+          element.setAttribute('aria-pressed', String(id === selected));
+        });
+        edgeElements.forEach((element) => {
+          const connected = Boolean(focus) && (element.dataset.source === focus || element.dataset.target === focus);
+          element.classList.toggle('is-highlighted', connected);
+          element.classList.toggle('is-dimmed', Boolean(focus) && !connected);
+        });
+      }
+
+      function show(id) {
+        selected = id;
+        const node = byId.get(id);
+        const publication = publications.find((item) => item.id === id);
+        const project = projects.find((item) => item.id === id);
+        detail.hidden = false;
+        root.querySelector('[data-detail-category]').textContent = publication ? `Publication · ${publication.year}` : project ? `Project · ${project.period}` : node.category;
+        root.querySelector('[data-detail-title]').textContent = publication?.title || node.label;
+        root.querySelector('[data-detail-summary]').textContent = node.summary;
+        const venue = root.querySelector('[data-detail-venue]');
+        venue.hidden = !publication;
+        venue.textContent = publication?.venue || '';
+        const paperLink = root.querySelector('[data-paper-link]');
+        paperLink.hidden = !publication && !project?.url;
+        if (publication) {
+          paperLink.href = publication.url;
+          paperLink.textContent = 'Open paper ↗';
+        } else if (project?.url) {
+          paperLink.href = project.url;
+          paperLink.textContent = 'Visit project ↗';
+        }
+        const researchLink = root.querySelector('[data-research-link]');
+        researchLink.hidden = !publication;
+        if (publication) researchLink.href = `/research/#${id}`;
+        relationList.replaceChildren(...linkedEdges(id).map((edge) => {
+          const other = byId.get(edge.source === id ? edge.target : edge.source);
+          const li = document.createElement('li');
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.textContent = other.label;
+          button.addEventListener('click', () => show(other.id));
+          const reason = document.createElement('span');
+          reason.textContent = edge.reason;
+          li.append(button, reason);
+          return li;
+        }));
+        paint();
+      }
+
+      function close() {
+        selected = null;
+        detail.hidden = true;
+        paint();
+      }
+
+      nodeElements.forEach((element) => {
+        element.addEventListener('pointerdown', (event) => {
+          if (event.button !== 0 || mobileView.matches) return;
+          const id = element.dataset.node;
+          const origin = positions.get(id);
+          nodeDrag = { id, start: pointerPoint(event), x: origin.x, y: origin.y, moved: false };
+          element.classList.add('is-dragging');
+          svg.setPointerCapture(event.pointerId);
+          event.preventDefault();
+          event.stopPropagation();
+        });
+        element.addEventListener('pointerenter', () => { hovered = element.dataset.node; paint(); });
+        element.addEventListener('pointerleave', () => { hovered = null; paint(); });
+        element.addEventListener('focus', () => { hovered = element.dataset.node; paint(); });
+        element.addEventListener('blur', () => { hovered = null; paint(); });
+        element.addEventListener('click', (event) => {
+          if (suppressClick?.id === element.dataset.node && performance.now() < suppressClick.until) {
+            event.preventDefault();
+            suppressClick = null;
+            return;
+          }
+          show(element.dataset.node);
+        });
+        element.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            show(element.dataset.node);
+          }
+        });
+      });
+      root.querySelector('[data-detail-close]').addEventListener('click', close);
+      root.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && selected) {
+          const previous = selected;
+          close();
+          elementById.get(previous)?.focus();
+        }
+      });
+
+      function applyView() {
+        svg.setAttribute('viewBox', `${view.x} ${view.y} ${view.width} ${view.height}`);
+      }
+      function resetView() {
+        view = { x: 0, y: 0, width: 1200, height: 650 };
+        applyView();
+        if (simulationFrame !== null) cancelAnimationFrame(simulationFrame);
+        simulationFrame = null;
+        temperature = 0;
+        positions.forEach((position, id) => {
+          const node = byId.get(id);
+          position.x = node.x * 12;
+          position.y = node.y * 6.5;
+          position.vx = 0;
+          position.vy = 0;
+        });
+        renderPositions();
+      }
+      root.querySelector('[data-reset-view]').addEventListener('click', resetView);
+      svg.addEventListener('wheel', (event) => {
+        event.preventDefault();
+        const scale = event.deltaY > 0 ? 1.12 : 0.89;
+        const nextWidth = Math.min(1500, Math.max(650, view.width * scale));
+        const nextHeight = nextWidth * 650 / 1200;
+        const bounds = svg.getBoundingClientRect();
+        const px = (event.clientX - bounds.left) / bounds.width;
+        const py = (event.clientY - bounds.top) / bounds.height;
+        view.x += (view.width - nextWidth) * px;
+        view.y += (view.height - nextHeight) * py;
+        view.width = nextWidth;
+        view.height = nextHeight;
+        applyView();
+      }, { passive: false });
+      svg.addEventListener('pointerdown', (event) => {
+        if (event.target !== svg && !event.target.classList.contains('network-background')) return;
+        dragging = { x: event.clientX, y: event.clientY, startX: view.x, startY: view.y };
+        svg.setPointerCapture(event.pointerId);
+      });
+      svg.addEventListener('pointermove', (event) => {
+        if (nodeDrag) {
+          const point = pointerPoint(event);
+          const dx = point.x - nodeDrag.start.x;
+          const dy = point.y - nodeDrag.start.y;
+          if (Math.hypot(dx, dy) > 3) nodeDrag.moved = true;
+          if (nodeDrag.moved) {
+            const position = positions.get(nodeDrag.id);
+            nodeDrag.previousX = position.x;
+            nodeDrag.previousY = position.y;
+            position.x = Math.max(20, Math.min(1180, nodeDrag.x + dx));
+            position.y = Math.max(20, Math.min(630, nodeDrag.y + dy));
+            position.vx = 0;
+            position.vy = 0;
+            renderPositions();
+            reheat(.82);
+          }
+          return;
+        }
+        if (!dragging) return;
+        const bounds = svg.getBoundingClientRect();
+        view.x = dragging.startX - (event.clientX - dragging.x) * view.width / bounds.width;
+        view.y = dragging.startY - (event.clientY - dragging.y) * view.height / bounds.height;
+        applyView();
+      });
+      svg.addEventListener('pointerup', () => {
+        if (nodeDrag) {
+          const { id, moved } = nodeDrag;
+          suppressClick = { id, until: performance.now() + 300 };
+          elementById.get(id).classList.remove('is-dragging');
+          if (moved && !reducedMotion.matches) {
+            const position = positions.get(id);
+            position.vx = Math.max(-3, Math.min(3, (position.x - nodeDrag.previousX) * .2));
+            position.vy = Math.max(-3, Math.min(3, (position.y - nodeDrag.previousY) * .2));
+          }
+          nodeDrag = null;
+          if (moved) reheat(.65);
+          else show(id);
+        }
+        dragging = null;
+      });
+      svg.addEventListener('pointercancel', () => {
+        if (nodeDrag) elementById.get(nodeDrag.id).classList.remove('is-dragging');
+        nodeDrag = null;
+        dragging = null;
+      });
+
+      if (!reducedMotion.matches && !mobileView.matches) {
+        nodes.forEach((node, index) => {
+          const position = positions.get(node.id);
+          position.x += Math.sin(index * 2.4) * 5;
+          position.y += Math.cos(index * 2.1) * 5;
+        });
+        reheat(.55);
+      }
+    }
+  </script>
+</section>

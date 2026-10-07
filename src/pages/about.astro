@@ -1,0 +1,46 @@
+---
+import Base from '../layouts/Base.astro';
+
+const education = [
+  { title: 'PhD, Building Systems and Architectural Technologies', place: 'The University of Hong Kong · Department of Architecture', period: '2025–present' },
+  { title: 'MSc, Architecture and Urban Planning', place: 'University of Stuttgart · DAAD scholarship', period: '2018–2020' },
+  { title: 'Bachelor of Architecture', place: 'Tongji University', period: '2013–2018' },
+];
+const experience = [
+  { title: 'Data Strategist / Strategy Specialist', place: 'Shanghai Westwell Technology', period: '2022–2024' },
+  { title: 'Research Assistant', place: 'Tongji University Computational Urban Design Lab', period: '2022' },
+  { title: 'Architect', place: 'Atelier Z+', period: '2021–2022' },
+];
+const recognition = [
+  { title: 'First prize, Smart Buildings Competition', place: 'ICML CO-BUILD Workshop', period: '2025' },
+  { title: 'Third place, Smart Buildings Competition', place: 'NeurIPS UrbanAI Workshop', period: '2025' },
+];
+const sections = [
+  { id: 'education', label: 'Education', items: education },
+  { id: 'experience', label: 'Experience', items: experience },
+  { id: 'recognition', label: 'Recognition', items: recognition },
+];
+---
+<Base title="About" description="Kanxuan He's education, experience, and recognition." active="About">
+  <header class="about-intro">
+    <div>
+      <h1>About</h1>
+      <p>Kanxuan He is a PhD researcher at the University of Hong Kong, working across climate, building performance, and data-informed design.</p>
+    </div>
+    <div class="about-aside">
+      <div class="about-avatar"><img src="/images/kanxuan-he.jpg" alt="Portrait of Kanxuan He" width="2266" height="2266" /></div>
+      <a href="/research/">Publications and projects ↗</a>
+    </div>
+  </header>
+  <div class="about-cv">
+    {sections.map((section) => <section class="cv-section" aria-labelledby={section.id}>
+      <h2 id={section.id}>{section.label}</h2>
+      <div class="cv-entries">
+        {section.items.map((item) => <div class="cv-entry">
+          <div><h3>{item.title}</h3><p>{item.place}</p></div>
+          <span>{item.period}</span>
+        </div>)}
+      </div>
+    </section>)}
+  </div>
+</Base>

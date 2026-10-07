@@ -1,0 +1,25 @@
+---
+import Base from '../layouts/Base.astro';
+import Network from '../components/Network.astro';
+import { publications, featuredIds } from '../data/research.js';
+const featured = featuredIds.map((id) => publications.find((item) => item.id === id));
+---
+<Base title="Home" description="Kanxuan He studies interpretable dynamics for a climate-responsive built environment." active="Home">
+  <section class="home-intro" aria-labelledby="home-title">
+    <div>
+      <h1 id="home-title"><span>Interpretable Dynamics for a</span><span>Climate-Responsive Built Environment</span></h1>
+    </div>
+    <p>I study how weather, buildings, and people change together over time. I use observations, simulation, and interpretable models to turn those relationships into better design and adaptation decisions.</p>
+  </section>
+  <Network />
+  <section class="featured-section" aria-labelledby="featured-title">
+    <div class="section-heading"><h2 id="featured-title">Selected publications</h2><a href="/research/">View all nine ↗</a></div>
+    <div class="feature-list">
+      {featured.map((item) => <article class="feature-item">
+        <span class="feature-year">{item.year}</span>
+        <div><h3><a href={`/research/#${item.id}`}>{item.title}</a></h3><p>{item.venue}</p></div>
+        <a class="feature-open" href={item.url} target="_blank" rel="noopener noreferrer" aria-label={`Open ${item.title}`}>↗</a>
+      </article>)}
+    </div>
+  </section>
+</Base>

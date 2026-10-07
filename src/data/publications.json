@@ -1,0 +1,131 @@
+{
+  "source": "Zotero _MyPaper",
+  "snapshotDate": "2026-10-07",
+  "items": [
+    {
+      "id": "3E3ZDT6P",
+      "itemType": "journalArticle",
+      "title": "Revisiting Gehl’s urban design principles with computer vision and webcam data: Associations between public space and public life",
+      "authors": [
+        "Kanxuan He",
+        "Haoxuan Li",
+        "Huanjia Zhang",
+        "Qinru Hu",
+        "Yaoze Yu",
+        "Waishan Qiu"
+      ],
+      "date": "2025-03-20 2025-03-20",
+      "venue": "Environment and Planning B: Urban Analytics and City Science",
+      "doi": "10.1177/23998083251328771",
+      "url": "https://doi.org/10.1177/23998083251328771"
+    },
+    {
+      "id": "GVVKYU2B",
+      "itemType": "journalArticle",
+      "title": "Physics-Informed Neural Networks for robust thermal comfort prediction: Overcoming data quality limitations through physiological constraints",
+      "authors": [
+        "Hongshan Guo",
+        "Kanxuan He",
+        "Yongqiang Luo",
+        "Yu Chang"
+      ],
+      "date": "2025-11-01 2025-11-01",
+      "venue": "Building and Environment",
+      "doi": "10.1016/j.buildenv.2025.113588",
+      "url": "https://doi.org/10.1016/j.buildenv.2025.113588"
+    },
+    {
+      "id": "7IEN6SJB",
+      "itemType": "conferencePaper",
+      "title": "A Temporal Features-Enhanced Mixture-of-Experts Approach for Indoor Temperature Prediction",
+      "authors": [
+        "Kanxuan He",
+        "Hongshan Guo"
+      ],
+      "date": "2025-07-28 2025/07/28",
+      "venue": "ICML 2025 CO-BUILD Workshop on Computational Optimization of Buildings",
+      "doi": null,
+      "url": "https://openreview.net/forum?id=msKv6e1P9s"
+    },
+    {
+      "id": "8XQC9ZJJ",
+      "itemType": "conferencePaper",
+      "title": "Multi-Band Fusion Framework Using Hybrid Predictors for Indoor Temperature Forecasting",
+      "authors": [
+        "Kanxuan He",
+        "Hongshan Guo"
+      ],
+      "date": "2025-11-24 2025/11/24",
+      "venue": "UrbanAI: Harnessing Artificial Intelligence for Smart Cities",
+      "doi": null,
+      "url": "https://openreview.net/forum?id=2OWNsoi6fO"
+    },
+    {
+      "id": "STYAALGG",
+      "itemType": "journalArticle",
+      "title": "A co-simulation methodology for integrating data-driven termal sensation models with building energy control",
+      "authors": [
+        "Hongshan Guo",
+        "Kanxuan He",
+        "Youmin Xu",
+        "Yue Lei"
+      ],
+      "date": "2026-02-15 2026-02-15",
+      "venue": "Energy and Buildings",
+      "doi": "10.1016/j.enbuild.2025.116745",
+      "url": "https://doi.org/10.1016/j.enbuild.2025.116745"
+    },
+    {
+      "id": "WGSMXXWG",
+      "itemType": "journalArticle",
+      "title": "Input quality, not statistical complexity, determines climate-adapted weather file fidelity: A causal decomposition of degree-day errors",
+      "authors": [
+        "Hongshan Guo",
+        "Kanxuan He"
+      ],
+      "date": "2026-06-15 2026-06-15",
+      "venue": "Energy",
+      "doi": "10.1016/j.energy.2026.140867",
+      "url": "https://doi.org/10.1016/j.energy.2026.140867"
+    },
+    {
+      "id": "UMYPH435",
+      "itemType": "journalArticle",
+      "title": "Scenario-conditioned actual meteorological years (sAMY): A stochastic weather generator using multi-decadal observations",
+      "authors": [
+        "Hongshan Guo",
+        "Kanxuan He"
+      ],
+      "date": "2026-08-01 2026-08-01",
+      "venue": "Energy and Buildings",
+      "doi": "10.1016/j.enbuild.2026.117508",
+      "url": "https://doi.org/10.1016/j.enbuild.2026.117508"
+    },
+    {
+      "id": "GNBUN7RM",
+      "itemType": "conferencePaper",
+      "title": "Data-driven cross-regional climate zone classification for building codes: A future-compatible framework",
+      "authors": [
+        "Kanxuan He",
+        "Hongshan Guo"
+      ],
+      "date": "2026-00-00 2026",
+      "venue": "E3S Web of Conferences · IAQVEC 2026",
+      "doi": "10.1051/e3sconf/202671610011",
+      "url": "https://doi.org/10.1051/e3sconf/202671610011"
+    },
+    {
+      "id": "WVDQQHH6",
+      "itemType": "conferencePaper",
+      "title": "Probabilistic Sequence Generation Guided by Intensity-Duration Extreme Profiles",
+      "authors": [
+        "Kanxuan He",
+        "Hongshan Guo"
+      ],
+      "date": "2026-05-30 2026/05/30",
+      "venue": "ICML 2026 Workshop on Structured Probabilistic Inference & Generative Modeling",
+      "doi": null,
+      "url": "https://openreview.net/forum?id=n8bQJs1dip"
+    }
+  ]
+}
