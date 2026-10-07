@@ -1,5 +1,6 @@
 ---
 import { nodes, edges, relatedTo } from '../data/research.js';
+const researchPath = `${import.meta.env.BASE_URL}research/`;
 const map = new Map(nodes.map((node) => [node.id, node]));
 const categories = [
   { id: 'topic', label: 'Topics' },
@@ -49,8 +50,8 @@ const categories = [
         {nodes.filter((node) => node.category === category.id).map((node) => <details>
           <summary><span class:list={['list-dot', node.category]}></span><span>{node.label}</span><span class="list-count">{relatedTo(node.id).length}</span></summary>
           <p>{node.summary}</p>
-          <ul>{relatedTo(node.id).map(({ node: neighbor, reason }) => <li><strong>{neighbor.label}</strong><span>{reason}</span>{neighbor.category === 'publication' && <a href={`/research/#${neighbor.id}`}>Find publication ↗</a>}</li>)}</ul>
-          {node.category === 'publication' && <a class="list-publication-link" href={`/research/#${node.id}`}>Find publication ↗</a>}
+          <ul>{relatedTo(node.id).map(({ node: neighbor, reason }) => <li><strong>{neighbor.label}</strong><span>{reason}</span>{neighbor.category === 'publication' && <a href={`${researchPath}#${neighbor.id}`}>Find publication ↗</a>}</li>)}</ul>
+          {node.category === 'publication' && <a class="list-publication-link" href={`${researchPath}#${node.id}`}>Find publication ↗</a>}
         </details>)}
       </div>
     </div>)}
@@ -208,7 +209,7 @@ const categories = [
         }
         const researchLink = root.querySelector('[data-research-link]');
         researchLink.hidden = !publication;
-        if (publication) researchLink.href = `/research/#${id}`;
+        if (publication) researchLink.href = `${import.meta.env.BASE_URL}research/#${id}`;
         relationList.replaceChildren(...linkedEdges(id).map((edge) => {
           const other = byId.get(edge.source === id ? edge.target : edge.source);
           const li = document.createElement('li');

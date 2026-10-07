@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Network from '../components/Network.astro';
 import { publications, featuredIds } from '../data/research.js';
 const featured = featuredIds.map((id) => publications.find((item) => item.id === id));
+const researchPath = `${import.meta.env.BASE_URL}research/`;
 ---
 <Base title="Home" description="Kanxuan He studies interpretable dynamics for a climate-responsive built environment." active="Home">
   <section class="home-intro" aria-labelledby="home-title">
@@ -13,11 +14,11 @@ const featured = featuredIds.map((id) => publications.find((item) => item.id ===
   </section>
   <Network />
   <section class="featured-section" aria-labelledby="featured-title">
-    <div class="section-heading"><h2 id="featured-title">Selected publications</h2><a href="/research/">View all nine ↗</a></div>
+    <div class="section-heading"><h2 id="featured-title">Selected publications</h2><a href={researchPath}>View all nine ↗</a></div>
     <div class="feature-list">
       {featured.map((item) => <article class="feature-item">
         <span class="feature-year">{item.year}</span>
-        <div><h3><a href={`/research/#${item.id}`}>{item.title}</a></h3><p>{item.venue}</p></div>
+        <div><h3><a href={`${researchPath}#${item.id}`}>{item.title}</a></h3><p>{item.venue}</p></div>
         <a class="feature-open" href={item.url} target="_blank" rel="noopener noreferrer" aria-label={`Open ${item.title}`}>↗</a>
       </article>)}
     </div>
