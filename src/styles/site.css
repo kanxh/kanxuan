@@ -36,9 +36,9 @@ a { color: inherit; }
 
 /* The map owns the opening viewport. All labels remain readable without hover. */
 .network-section { padding: .35rem 0 0; }
-.network-stage { position: relative; height: clamp(300px, calc(100svh - 270px), 740px); overflow: hidden; border: 1px solid var(--line); background: var(--stage); }
-.network-svg { display: block; width: 100%; height: 100%; touch-action: none; }
-.network-background { fill: var(--stage); }
+.network-stage { position: relative; z-index: 1; width: 100vw; margin-left: calc(50% - 50vw); height: clamp(300px, calc(100svh - 270px), 740px); overflow: visible; background: var(--paper); }
+.network-svg { display: block; width: 100%; height: 100%; overflow: visible; touch-action: none; }
+.network-background { fill: var(--paper); }
 .network-edges line { stroke: #809489; stroke-width: 1; opacity: .34; transition: opacity 180ms ease, stroke-width 180ms ease, stroke 180ms ease; }
 .network-edges line.is-highlighted { stroke: var(--topic); stroke-width: 1.7; opacity: .85; }
 .network-edges line.is-dimmed { opacity: .055; }
@@ -58,16 +58,16 @@ a { color: inherit; }
 .network-node.hub.is-focused .node-dot { r: 10; }
 .network-node.publication.is-focused .node-dot { r: 6; }
 .network-node.publication.is-related .node-dot { r: 5; }
-.node-label { fill: var(--ink); font-family: var(--sans); font-size: 13.5px; font-weight: 600; opacity: 0; paint-order: stroke; stroke: var(--stage); stroke-width: 4px; stroke-linejoin: round; transition: opacity 180ms ease; pointer-events: none; }
+.node-label { fill: var(--ink); font-family: var(--sans); font-size: 13.5px; font-weight: 600; opacity: 0; paint-order: stroke; stroke: var(--paper); stroke-width: 4px; stroke-linejoin: round; transition: opacity 180ms ease; pointer-events: none; }
 .network-node.hub .node-label { font-size: 15.5px; font-weight: 700; }
 .network-node.prominent .node-label, .network-node.is-related .node-label, .network-node.is-focused .node-label, .network-node:hover .node-label, .network-node:focus-visible .node-label { opacity: 1; }
 .network-node.publication .node-label { fill: #365b73; font-size: 12.5px; font-weight: 550; }
 .network-node:focus-visible { outline: none; }
 .network-node:focus-visible .node-halo { stroke: var(--ink); stroke-width: 2; }
 .map-reset { position: absolute; bottom: 1rem; z-index: 2; padding: .55rem .8rem; background: rgba(247, 246, 241, .91); border: 1px solid var(--line); color: var(--muted); font-size: .86rem; }
-.map-reset { right: 1rem; cursor: pointer; }
+.map-reset { right: calc((100vw - min(92vw, 1560px)) / 2 + 1rem); cursor: pointer; }
 .map-reset:hover { color: var(--ink); }
-.network-detail { position: absolute; z-index: 5; top: 1rem; right: 1rem; width: min(360px, calc(100% - 2rem)); max-height: calc(100% - 4.5rem); overflow: auto; padding: 1.35rem 1.5rem; background: rgba(249, 249, 245, .97); border: 1px solid var(--line); box-shadow: 0 12px 32px rgba(38, 49, 45, .12); }
+.network-detail { position: absolute; z-index: 5; top: 1rem; right: calc((100vw - min(92vw, 1560px)) / 2 + 1rem); width: min(360px, calc(100% - 2rem)); max-height: calc(100% - 4.5rem); overflow: auto; padding: 1.35rem 1.5rem; background: rgba(249, 249, 245, .97); border: 1px solid var(--line); box-shadow: 0 12px 32px rgba(38, 49, 45, .12); }
 .detail-heading { display: flex; align-items: center; justify-content: space-between; color: var(--topic); font-size: .86rem; font-weight: 700; text-transform: capitalize; }
 .detail-heading button { border: 0; background: none; color: var(--ink); font-size: 1.5rem; line-height: 1; cursor: pointer; }
 .network-detail h3 { margin: 1.1rem 0 .8rem; font-size: 1.55rem; line-height: 1.18; font-weight: 650; letter-spacing: -.035em; }
@@ -192,7 +192,7 @@ a { color: inherit; }
   .site-nav a { font-size: .88rem; }
   .site-footer { flex-direction: column; gap: .5rem; font-size: .88rem; }
   .network-section { padding-top: .5rem; }
-  .network-stage { height: clamp(205px, 28svh, 245px); min-height: 0; }
+  .network-stage { z-index: auto; height: clamp(205px, 28svh, 245px); min-height: 0; overflow: hidden; }
   .network-svg { pointer-events: none; }
   .network-node .node-label { opacity: 0 !important; }
   .map-reset, .network-detail { display: none !important; }

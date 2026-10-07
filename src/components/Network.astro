@@ -70,11 +70,26 @@ const categories = [
       const relationList = root.querySelector('[data-detail-relations]');
       let selected = null;
       let hovered = null;
-      let view = { x: 0, y: 0, width: 1200, height: 650 };
+      function homeView() {
+        const bounds = svg.getBoundingClientRect();
+        const width = Math.max(1200, bounds.width / bounds.height * 650);
+        return { x: (1200 - width) / 2, y: 0, width, height: 650 };
+      }
+      let view = homeView();
+      let viewFollowsStage = true;
+      const dragBounds = { ...view };
+      window.addEventListener('resize', () => {
+        const nextView = homeView();
+        Object.assign(dragBounds, nextView);
+        if (viewFollowsStage) {
+          view = nextView;
+          applyView();
+        }
+      });
       let dragging = null;
       let nodeDrag = null;
       let suppressClick = null;
-      const positions = new Map(nodes.map((node) => [node.id, { x: node.x * 12, y: node.y * 6.5, vx: 0, vy: 0 }]));
+      const positions = new Map(nodes.map((node) => [node.id, { id: node.id, x: node.x * 12, y: node.y * 6.5, vx: 0, vy: 0 }]));
       const links = edges.map((edge) => {
         const a = positions.get(edge.source);
         const b = positions.get(edge.target);
@@ -84,6 +99,7 @@ const categories = [
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
       let temperature = 0;
       let simulationFrame = null;
+      let resetAnimationFrame = null;
 
       function syncMobileAccess() {
         svg.setAttribute('aria-hidden', String(mobileView.matches));
@@ -140,18 +156,19 @@ const categories = [
           const pull = (distance - restDistance) * .018 * temperature;
           const fx = dx / distance * pull;
           const fy = dy / distance * pull;
-          if (a !== positions.get(activeId)) { a.vx += fx; a.vy += fy; }
-          if (b !== positions.get(activeId)) { b.vx -= fx; b.vy -= fy; }
+          if (a.id !== activeId) { a.vx += fx; a.vy += fy; }
+          if (b.id !== activeId) { b.vx -= fx; b.vy -= fy; }
         });
 
         let speed = 0;
+        const page = pageBounds();
         nodes.forEach((node) => {
           if (node.id === activeId) return;
           const point = positions.get(node.id);
           point.vx = (point.vx + (node.x * 12 - point.x) * .006 * temperature) * .83;
           point.vy = (point.vy + (node.y * 6.5 - point.y) * .006 * temperature) * .83;
-          point.x = Math.max(20, Math.min(1180, point.x + point.vx));
-          point.y = Math.max(20, Math.min(630, point.y + point.vy));
+          point.x = Math.max(page.minX, Math.min(page.maxX, point.x + point.vx));
+          point.y = Math.max(page.minY, Math.min(page.maxY, point.y + point.vy));
           speed = Math.max(speed, Math.abs(point.vx), Math.abs(point.vy));
         });
         renderPositions();
@@ -167,6 +184,22 @@ const categories = [
 
       function pointerPoint(event) {
         return new DOMPoint(event.clientX, event.clientY).matrixTransform(svg.getScreenCTM().inverse());
+      }
+
+      function pageBounds() {
+        const inverse = svg.getScreenCTM().inverse();
+        const corners = [
+          new DOMPoint(0, 0),
+          new DOMPoint(window.innerWidth, 0),
+          new DOMPoint(0, window.innerHeight),
+          new DOMPoint(window.innerWidth, window.innerHeight),
+        ].map((point) => point.matrixTransform(inverse));
+        return {
+          minX: Math.min(...corners.map((point) => point.x)),
+          maxX: Math.max(...corners.map((point) => point.x)),
+          minY: Math.min(...corners.map((point) => point.y)),
+          maxY: Math.max(...corners.map((point) => point.y)),
+        };
       }
 
       function paint() {
@@ -274,26 +307,72 @@ const categories = [
         svg.setAttribute('viewBox', `${view.x} ${view.y} ${view.width} ${view.height}`);
       }
       function resetView() {
-        view = { x: 0, y: 0, width: 1200, height: 650 };
-        applyView();
         if (simulationFrame !== null) cancelAnimationFrame(simulationFrame);
         simulationFrame = null;
         temperature = 0;
-        positions.forEach((position, id) => {
-          const node = byId.get(id);
-          position.x = node.x * 12;
-          position.y = node.y * 6.5;
-          position.vx = 0;
-          position.vy = 0;
-        });
-        renderPositions();
+        if (resetAnimationFrame !== null) cancelAnimationFrame(resetAnimationFrame);
+
+        const startView = { ...view };
+        const targetView = homeView();
+        const startPositions = new Map([...positions].map(([id, position]) => [id, { x: position.x, y: position.y }]));
+        const duration = 1200;
+        let startTime = null;
+        viewFollowsStage = false;
+
+        function animateReset(timestamp) {
+          if (startTime === null) startTime = timestamp;
+          const progress = Math.min(1, (timestamp - startTime) / duration);
+          const eased = 1 - (1 - progress) ** 3;
+          view = {
+            x: startView.x + (targetView.x - startView.x) * eased,
+            y: startView.y + (targetView.y - startView.y) * eased,
+            width: startView.width + (targetView.width - startView.width) * eased,
+            height: startView.height + (targetView.height - startView.height) * eased,
+          };
+          positions.forEach((position, id) => {
+            const node = byId.get(id);
+            const start = startPositions.get(id);
+            position.x = start.x + (node.x * 12 - start.x) * eased;
+            position.y = start.y + (node.y * 6.5 - start.y) * eased;
+            position.vx = 0;
+            position.vy = 0;
+          });
+          applyView();
+          renderPositions();
+
+          if (progress < 1 && !reducedMotion.matches) {
+            resetAnimationFrame = requestAnimationFrame(animateReset);
+            return;
+          }
+
+          view = targetView;
+          viewFollowsStage = true;
+          Object.assign(dragBounds, targetView);
+          positions.forEach((position, id) => {
+            const node = byId.get(id);
+            position.x = node.x * 12;
+            position.y = node.y * 6.5;
+            position.vx = 0;
+            position.vy = 0;
+          });
+          applyView();
+          renderPositions();
+          resetAnimationFrame = null;
+        }
+
+        if (reducedMotion.matches) {
+          animateReset(performance.now() + duration);
+        } else {
+          resetAnimationFrame = requestAnimationFrame(animateReset);
+        }
       }
       root.querySelector('[data-reset-view]').addEventListener('click', resetView);
       svg.addEventListener('wheel', (event) => {
         event.preventDefault();
+        viewFollowsStage = false;
         const scale = event.deltaY > 0 ? 1.12 : 0.89;
-        const nextWidth = Math.min(1500, Math.max(650, view.width * scale));
-        const nextHeight = nextWidth * 650 / 1200;
+        const nextWidth = Math.max(Math.max(650, dragBounds.width * .55), Math.min(Math.max(1500, dragBounds.width * 1.25), view.width * scale));
+        const nextHeight = view.height * nextWidth / view.width;
         const bounds = svg.getBoundingClientRect();
         const px = (event.clientX - bounds.left) / bounds.width;
         const py = (event.clientY - bounds.top) / bounds.height;
@@ -316,10 +395,11 @@ const categories = [
           if (Math.hypot(dx, dy) > 3) nodeDrag.moved = true;
           if (nodeDrag.moved) {
             const position = positions.get(nodeDrag.id);
+            const page = pageBounds();
             nodeDrag.previousX = position.x;
             nodeDrag.previousY = position.y;
-            position.x = Math.max(20, Math.min(1180, nodeDrag.x + dx));
-            position.y = Math.max(20, Math.min(630, nodeDrag.y + dy));
+            position.x = Math.max(page.minX, Math.min(page.maxX, nodeDrag.x + dx));
+            position.y = Math.max(page.minY, Math.min(page.maxY, nodeDrag.y + dy));
             position.vx = 0;
             position.vy = 0;
             renderPositions();
@@ -328,6 +408,7 @@ const categories = [
           return;
         }
         if (!dragging) return;
+        viewFollowsStage = false;
         const bounds = svg.getBoundingClientRect();
         view.x = dragging.startX - (event.clientX - dragging.x) * view.width / bounds.width;
         view.y = dragging.startY - (event.clientY - dragging.y) * view.height / bounds.height;
