@@ -5,7 +5,7 @@ export const publications = snapshot.items.map((item) => ({
   year: Number(item.date.slice(0, 4)),
 })).sort((a, b) => b.year - a.year || a.title.localeCompare(b.title));
 
-export const featuredIds = ['UMYPH435', 'WGSMXXWG', '3E3ZDT6P'];
+export const featuredIds = ['7IEN6SJB', 'WVDQQHH6', 'UMYPH435'];
 
 export const projects = [
   {

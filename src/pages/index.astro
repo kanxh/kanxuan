@@ -10,15 +10,15 @@ const researchPath = `${import.meta.env.BASE_URL}research/`;
     <div>
       <h1 id="home-title"><span>Interpretable Dynamics for a</span><span>Climate-Responsive Built Environment</span></h1>
     </div>
-    <p>I study how weather, buildings, and people change together over time. I use observations, simulation, and interpretable models to turn those relationships into better design and adaptation decisions.</p>
+    <p>I study the coupled dynamics of weather, buildings, and people, seeking to reveal interpretable structure in their interactions and inform climate-responsive design and adaptation.</p>
   </section>
   <Network />
   <section class="featured-section" aria-labelledby="featured-title">
-    <div class="section-heading"><h2 id="featured-title">Selected publications</h2><a href={researchPath}>View all nine ↗</a></div>
+    <div class="section-heading"><h2 id="featured-title">Selected publications</h2><a href={researchPath}>View all ↗</a></div>
     <div class="feature-list">
       {featured.map((item) => <article class="feature-item">
         <span class="feature-year">{item.year}</span>
-        <div><h3><a href={`${researchPath}#${item.id}`}>{item.title}</a></h3><p>{item.venue}</p></div>
+        <div><h3><a href={`${researchPath}#${item.id}`}>{item.title}</a></h3><p>{item.venue}{item.id === '7IEN6SJB' && <span class="feature-award">First prize</span>}</p></div>
         <a class="feature-open" href={item.url} target="_blank" rel="noopener noreferrer" aria-label={`Open ${item.title}`}>↗</a>
       </article>)}
     </div>
