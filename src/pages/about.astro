@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import { projects } from '../data/research.js';
 const base = import.meta.env.BASE_URL;
 
 const education = [
@@ -30,7 +31,7 @@ const sections = [
     </div>
     <div class="about-aside">
       <div class="about-avatar"><img src={`${base}images/kanxuan-he.jpg`} alt="Portrait of Kanxuan He" width="2266" height="2266" /></div>
-      <a href={`${base}research/`}>Publications and projects ↗</a>
+      <a href={`${base}research/`}>Research publications ↗</a>
     </div>
   </header>
   <div class="about-cv">
@@ -43,5 +44,14 @@ const sections = [
         </div>)}
       </div>
     </section>)}
+    <section class="cv-section" aria-labelledby="selected-projects-title">
+      <h2 id="selected-projects-title">Selected projects</h2>
+      <div class="about-projects">
+        {projects.map((project) => <article class="about-project">
+          <div class="about-project-heading"><h3>{project.title}</h3><span>{project.type} · {project.period}</span></div>
+          <p>{project.description}{project.url && <> <a href={project.url} target="_blank" rel="noopener noreferrer">Visit project ↗</a></>}</p>
+        </article>)}
+      </div>
+    </section>
   </div>
 </Base>

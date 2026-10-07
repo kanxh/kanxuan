@@ -171,6 +171,13 @@ a { color: inherit; }
 .about-cv { padding-bottom: 5rem; }
 .cv-section { display: grid; grid-template-columns: minmax(150px, 24%) minmax(0, 1fr); gap: 2rem; padding: 1.65rem 0; border-top: 1px solid var(--line); }
 .cv-section h2 { margin: 0; font-size: 1.02rem; font-weight: 650; }
+.about-project { padding: 0 0 1.15rem; margin: 0 0 1.15rem; border-bottom: 1px solid var(--line); }
+.about-project:last-child { padding-bottom: 0; margin-bottom: 0; border-bottom: 0; }
+.about-project-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.about-project-heading h3 { margin: 0; font-size: 1.06rem; font-weight: 600; }
+.about-project-heading span { flex: none; color: var(--muted); font-size: .9rem; }
+.about-project p { max-width: 720px; margin: .45rem 0 0; color: var(--muted); font-size: .96rem; line-height: 1.5; }
+.about-project a { color: var(--topic); font-size: .92rem; text-decoration: underline; text-underline-offset: .2rem; }
 .cv-entries { min-width: 0; }
 .cv-entry { display: flex; justify-content: space-between; gap: 2rem; padding: 0 0 1.25rem; }
 .cv-entry:last-child { padding-bottom: 0; }
@@ -220,6 +227,7 @@ a { color: inherit; }
   .about-aside { align-items: start; margin-top: 1.4rem; }
   .cv-section { display: block; padding: 1.3rem 0; }
   .cv-section h2 { margin-bottom: 1.2rem; }
+  .about-project-heading { align-items: flex-start; flex-direction: column; gap: .2rem; }
   .cv-entry { gap: 1rem; }
 }
 @media (max-width: 480px) {

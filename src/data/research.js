@@ -13,7 +13,7 @@ export const projects = [
     title: 'Latent Space',
     period: '2022',
     type: 'Design practice',
-    description: 'A generative architectural design toolbox conceived as a lightweight, customizable interface for designers. Co-founded and designed through Yale Tsai CITY.',
+    description: 'Co-founded and designed a lightweight, customizable generative design toolbox for architectural practice.',
     url: 'https://latentspace.webflow.io',
   },
   {
