@@ -1,0 +1,14 @@
+.DS_Store
+.idea/
+.ipynb_checkpoints/
+.pytest_cache/
+__pycache__/
+_ARCHIVED/
+.vscode/
+.claude/
+.playwright-mcp/
+
+AGENTS.md
+CLAUDE.md
+
+*.png

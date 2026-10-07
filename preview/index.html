@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Graphite Preview</title>
+    <meta
+      name="description"
+      content="A graph-first homepage preview built from an Obsidian wiki, published papers, and placeholder projects."
+    />
+    <link rel="stylesheet" href="./assets/styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="site-header" aria-label="Primary">
+        <div class="identity">
+          <h1>Kanxuan He</h1>
+          <p>Research <span>·</span> Projects <span>·</span> Ideas</p>
+        </div>
+
+        <nav class="top-nav" aria-label="Sections">
+          <a class="is-active" href="#">Graph</a>
+          <a href="#">Timeline</a>
+          <a href="#">About</a>
+          <button class="icon-button nav-icon" type="button" aria-label="Theme toggle preview">☼</button>
+        </nav>
+      </header>
+
+      <main class="graph-shell">
+        <section class="graph-section">
+          <div class="graph-stage">
+            <div id="graph-canvas"></div>
+
+            <div class="graph-overlay">
+              <aside class="controls-card" aria-label="Graph controls">
+                <div class="control-block">
+                  <p class="control-label">View</p>
+                  <div class="control-group" role="group" aria-label="View mode">
+                    <button class="chip active" data-view="all">All</button>
+                    <button class="chip" data-view="cluster">By Cluster</button>
+                  </div>
+                </div>
+
+                <div class="control-block clusters-block hidden" id="clusters-block">
+                  <p class="control-label">Clusters</p>
+                  <div class="cluster-legend" id="cluster-legend" aria-label="Clusters"></div>
+                </div>
+              </aside>
+
+              <div class="focus-pill" id="focus-pill">Full graph</div>
+
+              <aside class="detail-panel" id="detail-panel" aria-live="polite">
+                <div class="panel-head">
+                  <div>
+                    <p class="panel-kicker" id="panel-kicker">Paper</p>
+                    <h2 id="panel-title">Graph detail</h2>
+                  </div>
+                  <button id="panel-close" class="icon-button" type="button" aria-label="Close detail panel">×</button>
+                </div>
+
+                <div class="panel-body">
+                  <p id="panel-summary" class="panel-summary"></p>
+
+                  <dl class="meta-list">
+                    <div>
+                      <dt>Cluster</dt>
+                      <dd id="panel-cluster">--</dd>
+                    </div>
+                    <div>
+                      <dt>Type</dt>
+                      <dd id="panel-type">--</dd>
+                    </div>
+                    <div>
+                      <dt>Year</dt>
+                      <dd id="panel-year">--</dd>
+                    </div>
+                  </dl>
+
+                  <div class="related-block">
+                    <div class="related-head">
+                      <span>Connections</span>
+                      <strong id="panel-related-count">0</strong>
+                    </div>
+                    <ul id="panel-related" class="related-list"></ul>
+                  </div>
+
+                  <a id="panel-link" class="panel-link hidden" href="#" target="_blank" rel="noreferrer">
+                    Open source note
+                  </a>
+                </div>
+              </aside>
+
+              <div class="timeline-wrap">
+                <div class="timeline-meta">
+                  <strong id="timeline-year">--</strong>
+                </div>
+                <input id="timeline-slider" type="range" min="0" max="0" value="0" />
+                <div id="timeline-ticks" class="timeline-ticks" aria-hidden="true"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <noscript>
+        <section class="noscript-card">
+          This preview needs JavaScript for the interactive graph, but the structure remains readable without the graph layer.
+        </section>
+      </noscript>
+    </div>
+
+    <script src="./data/graph-data.js"></script>
+    <script type="module" src="./assets/app.js"></script>
+  </body>
+</html>
