@@ -62,6 +62,7 @@ const categories = [
     const root = document.querySelector('[data-network]');
     if (root) {
       const svg = root.querySelector('svg');
+      const pageContent = document.querySelector('.site-wrap');
       const nodeElements = [...root.querySelectorAll('[data-node]')];
       const edgeElements = [...root.querySelectorAll('line[data-source]')];
       const byId = new Map(nodes.map((node) => [node.id, node]));
@@ -161,14 +162,13 @@ const categories = [
         });
 
         let speed = 0;
-        const page = pageBounds();
         nodes.forEach((node) => {
           if (node.id === activeId) return;
           const point = positions.get(node.id);
           point.vx = (point.vx + (node.x * 12 - point.x) * .006 * temperature) * .83;
           point.vy = (point.vy + (node.y * 6.5 - point.y) * .006 * temperature) * .83;
-          point.x = Math.max(page.minX, Math.min(page.maxX, point.x + point.vx));
-          point.y = Math.max(page.minY, Math.min(page.maxY, point.y + point.vy));
+          point.x += point.vx;
+          point.y += point.vy;
           speed = Math.max(speed, Math.abs(point.vx), Math.abs(point.vy));
         });
         renderPositions();
@@ -184,22 +184,6 @@ const categories = [
 
       function pointerPoint(event) {
         return new DOMPoint(event.clientX, event.clientY).matrixTransform(svg.getScreenCTM().inverse());
-      }
-
-      function pageBounds() {
-        const inverse = svg.getScreenCTM().inverse();
-        const corners = [
-          new DOMPoint(0, 0),
-          new DOMPoint(window.innerWidth, 0),
-          new DOMPoint(0, window.innerHeight),
-          new DOMPoint(window.innerWidth, window.innerHeight),
-        ].map((point) => point.matrixTransform(inverse));
-        return {
-          minX: Math.min(...corners.map((point) => point.x)),
-          maxX: Math.max(...corners.map((point) => point.x)),
-          minY: Math.min(...corners.map((point) => point.y)),
-          maxY: Math.max(...corners.map((point) => point.y)),
-        };
       }
 
       function paint() {
@@ -368,6 +352,9 @@ const categories = [
       }
       root.querySelector('[data-reset-view]').addEventListener('click', resetView);
       svg.addEventListener('wheel', (event) => {
+        const contentBounds = pageContent.getBoundingClientRect();
+        const graphBounds = svg.getBoundingClientRect();
+        if (event.clientX < contentBounds.left || event.clientX > contentBounds.right || event.clientY < graphBounds.top || event.clientY > graphBounds.bottom) return;
         event.preventDefault();
         viewFollowsStage = false;
         const scale = event.deltaY > 0 ? 1.12 : 0.89;
@@ -395,11 +382,10 @@ const categories = [
           if (Math.hypot(dx, dy) > 3) nodeDrag.moved = true;
           if (nodeDrag.moved) {
             const position = positions.get(nodeDrag.id);
-            const page = pageBounds();
             nodeDrag.previousX = position.x;
             nodeDrag.previousY = position.y;
-            position.x = Math.max(page.minX, Math.min(page.maxX, nodeDrag.x + dx));
-            position.y = Math.max(page.minY, Math.min(page.maxY, nodeDrag.y + dy));
+            position.x = nodeDrag.x + dx;
+            position.y = nodeDrag.y + dy;
             position.vx = 0;
             position.vy = 0;
             renderPositions();
